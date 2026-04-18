@@ -1,0 +1,99 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tool_name:
+        description: 'tool_folder_name（such as：calculator）'
+        required: true
+        default: 'my_tool'
+      app_name:
+        description: 'app_name'
+        required: true
+        default: 'my_tool'
+
+  push:
+    paths:
+      - 'tools/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        pip3 install buildozer cython
+
+    - name: Prepare tool files
+      run: |
+        mkdir -p build_project
+        cp -r tools/${{ github.event.inputs.tool_name }}/* build_project/ 2>/dev/null || cp -r tools/* build_project/ 2>/dev/null || echo "Using default"
+        
+        # 创建入口文件（如果没有 main.py）
+        if [ ! -f build_project/main.py ]; then
+          mv build_project/*.py build_project/main.py 2>/dev/null || echo "请确保有 .py 文件"
+        fi
+
+    - name: Create buildozer.spec
+      working-directory: build_project
+      run: |
+        cat > buildozer.spec << EOF
+        [app]
+        title = ${{ github.event.inputs.app_name }}
+        package.name = $(echo "${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')
+        package.domain = org.example
+        source.dir = .
+        source.include_exts = py,png,jpg,kv,atlas,ttf,txt,json,db,csv
+        version = 1.0
+        requirements = python3,kivy==2.2.1,pyte,pygments
+        orientation = portrait
+        fullscreen = 0
+        android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+        android.api = 33
+        android.minapi = 21
+        android.ndk = 25b
+        android.sdk = 33
+        android.archs = arm64-v8a,armeabi-v7a
+        
+        [buildozer]
+        log_level = 2
+        warn_on_root = 1
+        android.accept_sdk_license = True
+        android.gradle_options = -Xmx4096m
+        EOF
+
+    - name: Build APK
+      working-directory: build_project
+      timeout-minutes: 45
+      run: |
+        export ANDROIDSDK=$HOME/.buildozer/android/platform/android-sdk
+        export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
+        buildozer -v android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.event.inputs.app_name }}-apk
+        path: build_project/bin/*.apk
+        retention-days: 30
+
+    - name: Release APK
+      if: github.event_name == 'workflow_dispatch'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: ${{ github.event.inputs.app_name }} v${{ github.run_number }}
+        files: build_project/bin/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
