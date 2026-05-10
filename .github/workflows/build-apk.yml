@@ -1,0 +1,77 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tool_name:
+        description: '工具文件夹名'
+        required: true
+        default: 'my_game'
+      app_name:
+        description: '应用显示名称'
+        required: true
+        default: '我的游戏'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        pip3 install buildozer cython
+
+    - name: Prepare tool files
+      run: |
+        mkdir -p build_project
+        cp -r tools/${{ github.event.inputs.tool_name }}/* build_project/
+        if [ ! -f build_project/main.py ]; then
+          mv build_project/*.py build_project/main.py 2>/dev/null || true
+        fi
+
+    - name: Create buildozer.spec
+      working-directory: build_project
+      run: |
+        cat > buildozer.spec << EOF
+        [app]
+        title = ${{ github.event.inputs.app_name }}
+        package.name = $(echo "${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | tr -cd '[:alnum:]_')
+        package.domain = org.example
+        source.dir = .
+        source.include_exts = py,png,jpg,kv,atlas,ttf,txt,json,db,csv
+        version = 1.0
+        requirements = python3,kivy==2.2.1,pyte,pygments
+        orientation = portrait
+        fullscreen = 0
+        android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+        android.api = 33
+        android.minapi = 21
+        android.archs = arm64-v8a,armeabi-v7a
+        
+        [buildozer]
+        log_level = 2
+        warn_on_root = 1
+        android.accept_sdk_license = True
+        android.gradle_options = -Xmx4096m
+        EOF
+
+    - name: Build APK
+      working-directory: build_project
+      timeout-minutes: 45
+      run: |
+        buildozer -v android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.event.inputs.app_name }}-apk
+        path: build_project/bin/*.apk
+        retention-days: 30

@@ -1,0 +1,120 @@
+import pickle
+
+monsters_data = [
+    {
+        "name": "",
+        "introduction": "\n",
+        "health": "\n生命值",
+        "physical_attack": "物理_攻击力",
+        "water_attack": "水_攻击力",
+        "ice_attack": "冰_攻击力",
+        "fire_attack": "火_攻击力",
+        "electric_attack": "电_攻击力",
+        "physical_resistance": "物理_",
+        "water_resistance": "水_",
+        "ice_resistance": "冰_",
+        "fire_resistance": "火_",
+        "electric_resistance": "电_",
+        "story": "\n"
+    },
+    {
+        "name": "史莱姆",
+        "introduction": "普普通通的史莱姆",
+        "health": "35",
+        "physical_attack": "3",
+        "water_attack": "0",
+        "ice_attack": "0",
+        "fire_attack": "0",
+        "electric_attack": "0",
+        "physical_resistance": "0.1",
+        "water_resistance": "0.05",
+        "ice_resistance": "0.05",
+        "fire_resistance": "-0.15",
+        "electric_resistance": "0.05",
+        "story": "你问我它为啥有火属性较高的弱点，想想Terraria的火把是怎么来的。"
+    }, 
+    {
+        "name": "水史莱姆",
+        "introduction": "[史莱姆]的升级版！",
+        "health": "38",
+        "physical_attack": "1",
+        "water_attack": "3",
+        "ice_attack": "0",
+        "fire_attack": "0",
+        "electric_attack": "0",
+        "physical_resistance": "0.15",
+        "water_resistance": "1",
+        "ice_resistance": "-0.05",
+        "fire_resistance": "0.5",
+        "electric_resistance": "-0.2",
+        "story": "不知道它掉的凝胶还能不能做火把。"
+    },
+    {
+        "name": "冰史莱姆",
+        "introduction": "擅长治疗的史莱姆",
+        "health": "42",
+        "physical_attack": "1",
+        "water_attack": "0",
+        "ice_attack": "3",
+        "fire_attack": "0",
+        "electric_attack": "0",
+        "physical_resistance": "-0.05",
+        "water_resistance": "0",
+        "ice_resistance": "1",
+        "fire_resistance": "-0.35",
+        "electric_resistance": "0",
+        "story": "冰史莱姆从小就学物理学得很好，“水蒸气在温度小于0℃凝华成冰，这就是为什么我受伤和能那么快就好。”冰史莱姆经常跟别人这么解释，但实际上是从它身上掉落的冰变成水后又在它身上冻成冰了。"
+    },
+    {
+        "name": "火史莱姆",
+        "introduction": "攻击力较高的史莱姆",
+        "health": "32",
+        "physical_attack": "2",
+        "water_attack": "0",
+        "ice_attack": "0",
+        "fire_attack": "4",
+        "electric_attack": "0",
+        "physical_resistance": "0.05",
+        "water_resistance": "-0.3",
+        "ice_resistance": "0",
+        "fire_resistance": "1",
+        "electric_resistance": "0",
+        "story": "在史莱姆群中经常有人问它是怎么打出这么高的伤害的，它回答道：“‘蒸发’伤害倍率提升2倍，‘融化’伤害倍率提升1.5倍！”，但实际上这里的机制并不跟某个二字游戏一样。"
+    },
+    {
+        "name": "电史莱姆",
+        "introduction": "血量较高，擅长控制的史莱姆",
+        "health": "48",
+        "physical_attack": "1",
+        "water_attack": "0",
+        "ice_attack": "0",
+        "fire_attack": "0",
+        "electric_attack": "2",
+        "physical_resistance": "0.1",
+        "water_resistance": "0.15",
+        "ice_resistance": "0.15",
+        "fire_resistance": "0.15",
+        "electric_resistance": "1",
+        "story": "包括冰史莱姆的其他人都想知道它无尽的电能是怎么来的，直到有人发现它吃电池……"
+    }#,
+#    {
+#        "name": "僵尸",
+#        "introduction": "血量更高的怪物",
+#        "health": "80",
+#        "physical_attack": "5",
+#        "water_attack": "0",
+#        "ice_attack": "0",
+#        "fire_attack": "0",
+#        "electric_attack": "0",
+#        "physical_resistance": "0",
+#        "water_resistance": "0",
+#        "ice_resistance": "0",
+#        "fire_resistance": "-1",
+#        "electric_resistance": "0",
+#        "story": "有人问他为什么会来到这里，“那个整天‘歪比巴卜’的人都能穿越时空找玉米卷，我为什么不能穿越时空找脑子呢？”它如是说道。"
+#    }
+]
+
+with open("/storage/emulated/0/monsters_data.dat", 'wb') as f:
+    pickle.dump(monsters_data, f)
+    
