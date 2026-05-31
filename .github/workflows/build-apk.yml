@@ -42,10 +42,12 @@ jobs:
     - name: Create buildozer.spec
       working-directory: build_project
       run: |
+        APP_NAME="${{ github.event.inputs.app_name }}"
+        PKG_NAME=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | tr -cd '[:alnum:]_')
         cat > buildozer.spec << EOF
         [app]
-        title = ${{ github.event.inputs.app_name }}
-        package.name = $(echo "${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | tr -cd '[:alnum:]_')
+        title = $APP_NAME
+        package.name = $PKG_NAME
         package.domain = org.example
         source.dir = .
         source.include_exts = py,png,jpg,kv,atlas,ttf,txt,json,db,csv
